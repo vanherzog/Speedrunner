@@ -15,6 +15,7 @@ public class Player : MonoBehaviour
     private InputAction move;
     private InputAction jump;
     Vector2 moveDirection = Vector2.zero;
+    float moveDirectionY;
     public Rigidbody2D rb;
     public float moveSpeed = 5f;
     private int jumping = 0;
@@ -43,7 +44,7 @@ public class Player : MonoBehaviour
 
     private void FixedUpdate()
     {
-        rb.velocity = new Vector2(moveDirection.x * moveSpeed, moveDirection.y * moveSpeed);
+        rb.velocity = new Vector2(moveDirection.x * moveSpeed, moveDirectionY * moveSpeed);
     }
 
     // Update is called once per frame
@@ -51,12 +52,13 @@ public class Player : MonoBehaviour
     {
         moveDirection = move.ReadValue<Vector2>();
     }
+
     private void Jumping(InputAction.CallbackContext context)
     {
         if (jumpCount < 2f && jumping < 2f)
         {
-            Debug.Log("Jump");
             StartCoroutine(JumpCoroutine());
+            Debug.Log("Jump");
         }
     }
 
@@ -66,7 +68,9 @@ public class Player : MonoBehaviour
         jumpCount++;
 
         // Apply the jump force
-        rb.velocity = new Vector3(rb.velocity.x, CalculateJumpVerticalSpeed());
+        moveDirectionY = CalculateJumpVerticalSpeed(); //Mathf.Sqrt(2f * 15f);
+        yield return new WaitForSeconds(0.1f); // Adjust this delay if needed
+        moveDirectionY = 0f;
 
         // Wait for a short duration to prevent consecutive jumps
         yield return new WaitForSeconds(0.1f);
@@ -81,8 +85,9 @@ public class Player : MonoBehaviour
     private float CalculateJumpVerticalSpeed()
     {
         // Modify this method to adjust the jump height
-        return Mathf.Sqrt(2f * 2f * Mathf.Abs(Physics.gravity.y));
+        return Mathf.Sqrt(2f * 1.5f * Mathf.Abs(Physics.gravity.y));
     }
+
 
     public void ResetJump(bool touchGround)
     {
